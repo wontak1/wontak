@@ -1,0 +1,45 @@
+!pip install pandas numpy matplotlib seaborn
+
+import pandas as pd
+import numpy as np
+from matplotlib import pyplot as plt
+import seaborn
+
+
+data = pd.read_csv('data/president_heights.csv')
+data.head()
+heights = np.array(data['height(cm)'])
+print(heights)
+mean_height = np.mean(heights)
+std_deviation = np.std(heights)
+min_height = np.min(heights)
+max_height = np.max(heights)
+percentile_25 = np.percentile(heights, 25)
+median = np.median(heights)
+percentile_75 = np.percentile(heights, 75)
+
+print(f"Mean height = {mean_height}")
+print(f"Standard deviation = {std_deviation}")
+print(f"Minimum height = {min_height}")
+print(f"Maximum height = {max_height}")
+print(f"25th percentile = {percentile_25}")
+print(f"Median = {median}")
+print(f"75th percentile = {percentile_75}")
+max_idx = np.argmax(heights)
+min_idx = np.argmin(heights)
+print('max_idx =',max_idx)
+print('min_idx =',min_idx)
+max_name = data.iloc[max_idx]['name']
+min_name = data.iloc[min_idx]['name']
+
+print("The tallest president is", max_name)
+print("The smallest president is", min_name)
+%matplotlib inline
+%config InlineBackend.figure_format = 'svg'
+seaborn.set()
+
+plt.hist(heights)
+plt.title('Height Distribution of US President')
+plt.xlabel('height (cm)')
+plt.ylabel('number')
+plt.show()
