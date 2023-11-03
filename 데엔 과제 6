@@ -1,0 +1,99 @@
+%matplotlib inline
+import numpy as np
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+
+def f(z):
+    return z**2 - 1
+
+
+x, y = np.meshgrid(np.linspace(-10, 10, 20), np.linspace(-10, 10, 20))
+mesh = x + 1j * y
+
+
+output = np.abs(f(mesh))
+
+
+fig = plt.figure(figsize=(8, 6))
+ax1 = fig.add_subplot(121, projection='3d')
+ax1.scatter(x, y, output, alpha=0.2)
+ax1.set_xlabel('Real axis')
+ax1.set_ylabel('Imaginary axis')
+ax1.set_zlabel('Absolute value')
+ax1.set_title('One Iteration: $f(z) = z^2 - 1$')
+
+plt.show()  
+
+
+output = np.abs(f(f(mesh)))
+
+
+fig = plt.figure(figsize=(8, 6))
+ax2 = fig.add_subplot(121, projection='3d')  
+ax2.scatter(x, y, output, alpha=0.2)
+ax2.set_xlabel('Real axis')
+ax2.set_ylabel('Imaginary axis')
+ax2.set_zlabel('Absolute value')
+ax2.set_title('Two Iterations: $ f(z) = z^2 - 1$')
+
+plt.show()
+
+
+selected_values = np.array([0.4 + 0.4j, 0.41 + 0.4j, 0.4 + 0.41j])
+num_iter = 9
+
+outputs = np.zeros(
+    (num_iter+1, selected_values.shape[0]),
+    dtype=complex
+)
+outputs[0] = selected_values
+
+for i in range(num_iter):
+    outputs[i+1] = f(outputs[i])
+
+fig, axes = plt.subplots(1, selected_values.shape[0], figsize=(16, 6))
+axes[1].set_xlabel('Real axis')
+axes[0].set_ylabel('Imaginary axis')
+
+for ax, data in zip(axes, outputs.T):
+    cycle = ax.scatter(
+        data.real,
+        data.imag,
+        c=range(data.shape[0]), 
+        alpha=0.6
+    )
+    ax.set_title(f'Mapping of iterations on {data[0]}')
+
+fig.colorbar(cycle, ax=axes, location='bottom', label='Iteration')
+
+def divergence_rate(mesh, num_iter=10, radius=2):
+    z = mesh.copy()
+    diverge_len = np.zeros(mesh.shape)
+
+    for i in range(num_iter):
+        conv_mask = np.abs(z) < radius
+        diverge_len[conv_mask] += 1
+        z[conv_mask] = f(z[conv_mask])
+
+    return diverge_len
+
+x = np.linspace(-2, 2, 400)
+y = np.linspace(-2, 2, 400)
+x, y = np.meshgrid(x, y)
+mesh = x + 1j * y
+
+output = divergence_rate(mesh)
+
+fig = plt.figure(figsize=(5, 5))
+ax = plt.axes()
+
+ax.set_title('$f(z) = z^2-1$')
+ax.set_xlabel('Real axis')
+ax.set_ylabel('Imaginary axis')
+
+im = ax.imshow(output, extent=[-2, 2, -2, 2])
+divider = make_axes_locatable(ax)
+cax = divider.append_axes('right', size='5%', pad=0.1)
+plt.colorbar(im, cax=cax, label='Number of iterations')
+
+plt.show()
